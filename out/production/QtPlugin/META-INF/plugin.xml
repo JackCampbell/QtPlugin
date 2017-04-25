@@ -1,0 +1,56 @@
+<idea-plugin>
+  <id>jack.campbell.work.qt</id>
+  <name>Qt Generator</name>
+  <version>1.0</version>
+  <vendor email="info@firatozdemir.net" url="http://firatozdemir.net">Firat OZDEMIR</vendor>
+
+  <description><![CDATA[
+      Test plugin for QT.<br>
+      <em>Jack Campbell</em>
+    ]]></description>
+
+  <change-notes><![CDATA[
+      Test notes for QT.<br>
+      <em>Jack Campbell</em>
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="145.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!--uncomment to enable plugin in all products-->
+  <!--<depends>com.intellij.modules.lang</depends>-->
+  <depends>com.intellij.modules.clion</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!--<toolWindow id="Qt Resource View" anchor="right" factoryClass="jack.campbell.work.qt.QtResourceView"/>-->
+  </extensions>
+
+  <application-components>
+    <component>
+      <implementation-class>jack.campbell.work.qt.QtFileTypeRegistration</implementation-class>
+    </component>
+  </application-components>
+  <actions>
+    <action id="QtGenerator.ProjectNew"
+            class="jack.campbell.work.qt.NewQtProject"
+            text="New QT Project" description="Creates a new QT project">
+      <add-to-group group-id="FileMenu" anchor="first"/>
+      <add-to-group group-id="WelcomeScreen.QuickStart" anchor="first"/>
+    </action>
+    <action id="QtGenerator.FileDialogNew" class="jack.campbell.work.qt.NewQtDialogFile"
+            text="Custom QDialog file" description="New custom dialog File">
+      <add-to-group group-id="NewGroup" anchor="last"/>
+    </action>
+    <action id="QtGenerator.FileWindowNew" class="jack.campbell.work.qt.NewQtWindowFile"
+            text="Custom QMainWindow file" description="New custom window File">
+      <add-to-group group-id="NewGroup" anchor="last"/>
+    </action>
+  </actions>
+  
+  <project-components>
+  
+  </project-components>
+</idea-plugin>
