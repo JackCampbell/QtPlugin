@@ -158,7 +158,6 @@ public class NewQtProjectWizart extends CMakeProjectWizard {
 
 		Project project = null;
 		try {
-
 			project = ProjectManager.getInstance().loadAndOpenProject(projectAdapterPath);
 		} catch (IOException | JDOMException e) {
 			CPPLog.LOG.warn(e);
@@ -171,7 +170,8 @@ public class NewQtProjectWizart extends CMakeProjectWizard {
 		if (project == null) {
 			project = ProjectManager.getInstance().getDefaultProject();
 		}
-
+		ProjectManager.getInstance().reloadProject(project);
+		//CMakeWorkspace.getInstance(project)
 		CMakeProjectOpenProcessor.OpenProjectSpec projectSpec = CMakeProjectOpenProcessor.getHelper().getAndClearFileToOpenData(project);
 
 		deleteBuildOutputDir(projectSpec);
