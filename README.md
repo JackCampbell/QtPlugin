@@ -1,1 +1,1 @@
-# QtPlugin
+# QtPlugin for CLion
