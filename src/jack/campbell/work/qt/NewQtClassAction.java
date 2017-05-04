@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
-import com.jetbrains.cidr.cpp.cmake.workspace.CMakeWorkspace;
 
 /**
  * Created by jack on 4/29/17.
@@ -38,8 +37,8 @@ public class NewQtClassAction extends AnAction {
 
 			FileEditorManager.getInstance(project).openFile(vfile, true, true); //open in editor
 			directoryVirtualFile.refresh(true, false);
+
 			//ProjectManager.getInstance().reloadProject(project);
-			CMakeWorkspace.forceReloadOnOpening(vfile);
 		}
 	}
 }

@@ -21,6 +21,7 @@ public class NewQtProjectStep extends CMakeProjectStepAdapter implements Documen
 	private TextFieldWithBrowseButton fldMakePrefixPath;
 	private JTextField fldOrgName;
 	private JTextField fldOrgDomain;
+	private TextFieldWithBrowseButton fldIconFile;
 
 	private String lastProjectDir;
 	public NewQtProjectStep(String defaultProjectName, String defaultProjectPath) {
@@ -35,6 +36,8 @@ public class NewQtProjectStep extends CMakeProjectStepAdapter implements Documen
 		fldMakePrefixPath.addBrowseFolderListener( "Select QT Project Directory", null, null, new FileChooserDescriptor(
 				false, true, false, false, false, false));
 
+		fldIconFile.addBrowseFolderListener( "Select QT Project Icon", null, null, new FileChooserDescriptor(
+				true, false, false, false, false, false));
 		fldProjectPath.addActionListener(this);
 		fldProjectName.getDocument().addDocumentListener(this);
 	}
@@ -56,10 +59,8 @@ public class NewQtProjectStep extends CMakeProjectStepAdapter implements Documen
 
 	@Override
 	public JComponent getPreferredFocusedComponent() {
-		return panelLayout;
+		return fldProjectName;
 	}
-
-
 
 	@Override
 	public void insertUpdate(DocumentEvent e) {
@@ -85,7 +86,6 @@ public class NewQtProjectStep extends CMakeProjectStepAdapter implements Documen
 			fldProjectPath.setText(lastPath);
 			fldProjectPath.setAutoscrolls(true);
 		}
-
 //		if(fldOrgName.getText().isEmpty()) {
 //			fldOrgName.setText(projectName);
 //		}
@@ -93,6 +93,7 @@ public class NewQtProjectStep extends CMakeProjectStepAdapter implements Documen
 //			fldOrgDomain.setText(projectName.toLowerCase().concat(".ws"));
 //		}
 	}
+
 
 	public String GetName() {
 		return fldProjectName.getText();
@@ -107,15 +108,27 @@ public class NewQtProjectStep extends CMakeProjectStepAdapter implements Documen
 	}
 
 	public String GetOrganizationDomain() {
-		return fldOrgDomain.getText();
+		String domain = fldOrgDomain.getText();
+		if(domain.isEmpty()) {
+			domain = fldProjectName.getText().toLowerCase() + ".ws";
+		}
+		return domain;
 	}
 
 	public String GetOrganizationName() {
-		return fldOrgName.getText();
+		String orgName = fldOrgName.getText();
+		if(orgName.isEmpty()) {
+			orgName = fldProjectName.getText().toLowerCase();
+		}
+		return orgName;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		lastProjectDir = fldProjectPath.getText();
+	}
+
+	public String GetIconPath() {
+		return fldIconFile.getText();
 	}
 }

@@ -7,6 +7,8 @@ import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.ui.ValidationInfo;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +66,16 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 	@Override
 	public void changedUpdate(DocumentEvent e) {
 		SyncClassName(null);
+	}
+
+	@Nullable
+	@Override
+	protected ValidationInfo doValidate() {
+		String title = fldTitle.getText();
+		if(title.isEmpty()) {
+			return new ValidationInfo("Required", fldTitle);
+		}
+		return null;
 	}
 
 	private void SyncClassName(String selectItem) {
@@ -282,7 +294,10 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 			content += "\t\t\t\t</layout>\n";
 			content += "\t\t\t</item>\n";
 			content += "\t\t</layout>\n";
-		}
+        } else if(selectItem.equals("QDockWidget")) {
+            content += "<widget class=\"QWidget\" name=\"dockWidgetContents\">";
+            content += "</widget>";
+        }
 		content += "\t</widget>\n";
 		content += "\t<resources/>\n";
 		if(btnSlot.isSelected() && selectItem.equals("QDialog")) {
@@ -415,18 +430,19 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		if(!CheckDirectory(existingFile)) {
 			return;
 		}
+
 		super.doOKAction();
 	}
-
+	private Icon icon = IconLoader.findIcon("/qt_icon.png");
 	private void showEmptyFilenameError(Project project) {
 		Messages.showErrorDialog(project, "Wrong name", "Error");
 	}
 
 	private int getOverwriteChoice(Project project) {
-		return Messages.showYesNoCancelDialog(project, "Override", "File exists", null);
+		return Messages.showYesNoCancelDialog(project, "Override", "File exists", icon);
 	}
 
 	private String getDesiredFilename(Project project) {
-		return Messages.showInputDialog(project, "<name>Dialog ?", "New Dialog", null);
+		return Messages.showInputDialog(project, "<name>Dialog ?", "New Dialog", icon);
 	}
 }

@@ -21,6 +21,7 @@ public class QtFileTypeRegistration implements ApplicationComponent {
 						FileType cpp = FileTypeManager.getInstance().getFileTypeByExtension("cpp");
 						FileTypeManager.getInstance().associateExtension(cpp, "h");
 						//FileTypeManager.getInstance().associateExtension(cpp, "ui");
+						//FileTypeManager.getInstance().removeAssociatedExtension(cpp, "qrs");
 					}
 				});
 			}
@@ -37,6 +38,7 @@ public class QtFileTypeRegistration implements ApplicationComponent {
 						FileType cpp = FileTypeManager.getInstance().getFileTypeByExtension("cpp");
 						FileTypeManager.getInstance().removeAssociatedExtension(cpp, "h");
 						//FileTypeManager.getInstance().removeAssociatedExtension(cpp, "ui");
+						//FileTypeManager.getInstance().removeAssociatedExtension(cpp, "qrs");
 					}
 				});
 			}

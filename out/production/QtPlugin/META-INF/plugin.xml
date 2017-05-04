@@ -1,7 +1,7 @@
 <idea-plugin>
   <id>jack.campbell.work.qt</id>
   <name>Qt Generator</name>
-  <version>1.1</version>
+  <version>1.2</version>
   <vendor email="info@firatozdemir.net" url="http://firatozdemir.net">Firat OZDEMIR</vendor>
 
   <description><![CDATA[
@@ -36,12 +36,12 @@
   <actions>
     <action id="QtGenerator.ProjectNew"
             class="jack.campbell.work.qt.NewQtProject"
-            text="New QT Project" description="Creates a new QT project">
+            text="New QT Project" description="Creates a new QT project" icon="/qt_icon.png">
       <add-to-group group-id="FileMenu" anchor="first"/>
       <add-to-group group-id="WelcomeScreen.QuickStart" anchor="first"/>
     </action>
     <action id="QtGenerator.FileNewClass" class="jack.campbell.work.qt.NewQtClassAction"
-            text="Custom QT file" description="New Class File">
+            text="Custom QT file" description="New Class File" icon="/qt_icon.png">
       <add-to-group group-id="NewGroup" anchor="last"/>
     </action>
   </actions>
