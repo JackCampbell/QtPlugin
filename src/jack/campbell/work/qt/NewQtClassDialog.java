@@ -33,6 +33,7 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 	private JTextField fldSourceFile;
 	private JTextField fldHeaderFile;
 	private JTextField fldDesignFile;
+	private JCheckBox appendFromPrecompiledFileCheckBox;
 
 	private Project project;
 	private VirtualFile directoryVirtualFile;
@@ -42,6 +43,12 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		fldTitle.getDocument().addDocumentListener(this);
 		fldBaseClass.addItemListener(this);
 		btnDesign.addItemListener(this);
+		if(directoryVirtualFile.findChild("precompiled.h") != null) {
+			appendFromPrecompiledFileCheckBox.setSelected(true);
+		} else {
+			appendFromPrecompiledFileCheckBox.setSelected(false);
+		}
+
 		this.directoryVirtualFile = directoryVirtualFile;
 		this.project = project;
 		init();
@@ -71,9 +78,25 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 	@Nullable
 	@Override
 	protected ValidationInfo doValidate() {
-		String title = fldTitle.getText();
-		if(title.isEmpty()) {
+		String value = fldTitle.getText();
+		if(value.isEmpty()) {
 			return new ValidationInfo("Required", fldTitle);
+		}
+		value = fldClassName.getText();
+		if(value.isEmpty()) {
+			return new ValidationInfo("Required", fldClassName);
+		}
+		value = fldSourceFile.getText();
+		if(value.isEmpty()) {
+			return new ValidationInfo("Required", fldSourceFile);
+		}
+		value = fldHeaderFile.getText();
+		if(value.isEmpty()) {
+			return new ValidationInfo("Required", fldHeaderFile);
+		}
+		value = fldDesignFile.getText();
+		if(btnDesign.isSelected() && value.isEmpty()) {
+			return new ValidationInfo("Required", fldDesignFile);
 		}
 		return null;
 	}
@@ -90,26 +113,32 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		if(selectItem.equals("QDialog")) {
 			btnDesign.setEnabled(true);
 			btnSlot.setEnabled(true);
+			btnDesign.setSelected(true);
 			className = title + "Dialog";
 		} else if(selectItem.equals("QMainWindow")) {
 			btnDesign.setEnabled(true);
 			btnSlot.setEnabled(false);
+			btnDesign.setSelected(true);
 			className = title + "Window";
 		} else if(selectItem.equals("QDockWidget")) {
 			btnDesign.setEnabled(true);
 			btnSlot.setEnabled(false);
+			btnDesign.setSelected(true);
 			className = title + "Panel";
 		} else if(selectItem.equals("QWidget")) {
 			btnSlot.setEnabled(false);
 			btnDesign.setEnabled(true);
+			btnDesign.setSelected(true);
 			className = title + "View";
 		} else if(selectItem.equals("QMdiSubWindow")) {
 			btnSlot.setEnabled(false);
 			btnDesign.setEnabled(true);
+			btnDesign.setSelected(true);
 			className = title + "Child";
 		} else if(selectItem.equals("QObject")) {
 			btnSlot.setEnabled(false);
 			btnDesign.setEnabled(false);
+			btnDesign.setSelected(false);
 		}
 		fldDesignFile.setEnabled(btnDesign.isSelected());
 		fldClassName.setText(className);
@@ -132,9 +161,13 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		String className = fldClassName.getText();
 		String headerFile = fldHeaderFile.getText();
 		String content = "// Generator id: " + title + "\n";
-		content += "#include <QtCore>\n";
-		content += "#include <QtWidgets>\n";
-		content += "#include <QtCore>\n";
+		if(!appendFromPrecompiledFileCheckBox.isSelected()) {
+			content += "#include <QtCore>\n";
+			content += "#include <QtWidgets>\n";
+			content += "#include <QtCore>\n";
+		} else {
+			content += "#include \"precompiled.h\"\n";
+		}
 		content += "#pragma once\n";
 		content += "\n";
 		if(btnDesign.isSelected()) {
@@ -257,6 +290,7 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		content += "\t\t\t<string>" + title + "</string>\n";
 		content += "\t\t</property>\n";
 		if(selectItem.equals("QMainWindow")) {
+			content += "\t\t\t<widget class=\"QWidget\" name=\"centralwidget\" />\n";
 			content += "\t\t\t<widget class=\"QMenuBar\" name=\"menuBar\" />\n";
 			content += "\t\t\t<widget class=\"QStatusBar\" name=\"statusBar\" />\n";
 			content += "\t\t\t<widget class=\"QToolBar\" name=\"toolBar\" />\n";
@@ -299,7 +333,9 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
             content += "</widget>";
         }
 		content += "\t</widget>\n";
-		content += "\t<resources/>\n";
+		content += "\t<resources>\n";
+		content += "\t\t<include location=\"resources.qrc\" />\n";
+		content += "\t</resources>\n";
 		if(btnSlot.isSelected() && selectItem.equals("QDialog")) {
 			content += "\t<connections>\n";
 			content += "\t\t<connection>\n";
@@ -444,5 +480,9 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 
 	private String getDesiredFilename(Project project) {
 		return Messages.showInputDialog(project, "<name>Dialog ?", "New Dialog", icon);
+	}
+
+	private void createUIComponents() {
+		// TODO: place custom component creation code here
 	}
 }

@@ -16,8 +16,9 @@ import com.jetbrains.cidr.cpp.cmake.CMakeProjectOpenProcessor;
 import com.jetbrains.cidr.cpp.cmake.projectWizard.CLionProjectWizardUtils;
 import com.jetbrains.cidr.cpp.cmake.projectWizard.CMakeProjectWizard;
 
-import java.io.*;
-import java.util.Date;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -76,105 +77,21 @@ public class NewQtProjectWizart extends CMakeProjectWizard {
 	}
 
 
-	public static InputStream GetIconFileStream(NewQtProjectStep adapter) throws FileNotFoundException {
-		String file = adapter.GetIconPath();
-		if(file == null || file.isEmpty()) {
-			return NewQtProjectWizart.class.getResourceAsStream("/app_icon.icns");
-		}
-		return new FileInputStream(file);
-	}
+
+
+
 	public static String CreateProject(String projectRootPath, NewQtProjectStep adapter) throws IOException {
-		String cmakePrefix = adapter.GetToolPath();
-		String projectName = adapter.GetName();
+		String projectName = FileUtil.sanitizeFileName(adapter.GetName());
 
 		// check CMakeList
 		File projectRoot = new File(projectRootPath);
+		File mainFile = adapter.CreateMainFile(projectRoot);
+		File resource = adapter.CreateResource(projectRoot);
 
-		File cMakeLists = CreateMakeFile(projectRoot);
-		projectName = FileUtil.sanitizeFileName(projectName);
+		File makeFile = adapter.CreateMakeFile(projectRoot);
 
+		//VirtualFile cMakeListsVirtualFile = VfsUtil.findFileByIoFile(cMakeLists, true);
 
-		File resource = new File(projectRoot, "resources");
-		FileUtil.createDirectory(resource);
-		File localFile = new File(resource, "launcher.icns");
-		try(InputStream input = GetIconFileStream(adapter);
-			OutputStream output = new FileOutputStream(localFile)) {
-			FileUtil.copy(input, output);
-		}
-
-		CreateMainFile(projectRoot, adapter);
-		CreateResourceFile(projectRoot, adapter);
-
-		Date date = new Date();
-		VirtualFile cMakeListsVirtualFile = VfsUtil.findFileByIoFile(cMakeLists, true);
-		CMakeListsEditor cMakeListsEditor = CMakeListsEditor.getInstance(cMakeListsVirtualFile);
-		cMakeListsEditor.Clear();
-		cMakeListsEditor.AppendLine("cmake_minimum_required(VERSION 3.7)");
-		cMakeListsEditor.SetMethod("project", projectName);
-		cMakeListsEditor.blankLine();
-		cMakeListsEditor.SetVariable("CMAKE_OSX_DEPLOYMENT_TARGET", "10.10");
-		cMakeListsEditor.SetVariable("CMAKE_PREFIX_PATH", cmakePrefix);
-		cMakeListsEditor.SetVariable("CMAKE_CXX_STANDARD", "11");
-		cMakeListsEditor.SetVariable("PROJECT_VERSION ", "1.0.Alpha");
-		cMakeListsEditor.SetVariable("PROJECT_COPYRIGHT_YEAR", "" + date.getYear());
-		cMakeListsEditor.SetVariable("PROJECT_VENDOR", adapter.GetOrganizationName());
-		cMakeListsEditor.SetVariable("PROJECT_DOMAIN", adapter.GetOrganizationDomain());
-
-		//-DCMAKE_PREFIX_PATH=/Users/jack/Qt/5.8/clang_64/lib/cmake/
-		cMakeListsEditor.blankLine();
-		cMakeListsEditor.AppendLine("MESSAGE(STATUS \"Qt version: ${Qt5Core_VERSION_STRING}\")");
-		cMakeListsEditor.AppendLine("include_directories(cmake-build-debug)");
-
-//		cMakeListsEditor.AppendLine("#set(QT_PATH " + qtToolPath + ")");
-		cMakeListsEditor.AppendLine("find_package(Qt5Core REQUIRED)");
-		cMakeListsEditor.AppendLine("find_package(Qt5Widgets REQUIRED)");
-		cMakeListsEditor.AppendLine("find_package(Qt5Gui REQUIRED)");
-		cMakeListsEditor.AppendLine("# find_package(Qt5Sql REQUIRED)");
-		cMakeListsEditor.AppendLine("# find_package(Qt5SerialPort REQUIRED)");
-		cMakeListsEditor.AppendLine("# find_package(Qt5PrintSupport REQUIRED)");
-		cMakeListsEditor.blankLine();
-		cMakeListsEditor.AppendLine("# Find includes in corresponding build directories");
-		cMakeListsEditor.SetVariable("CMAKE_INCLUDE_CURRENT_DIR", "ON");
-		cMakeListsEditor.AppendLine("# Instruct CMake to run moc automatically when needed.");
-		cMakeListsEditor.SetVariable("CMAKE_AUTOMOC", "ON");
-		cMakeListsEditor.blankLine();
-
-		cMakeListsEditor.AppendLine("file(GLOB UI_FILES *.ui)");
-		cMakeListsEditor.AppendLine("file(GLOB SRC_FILES *.cpp *.h)");
-		cMakeListsEditor.blankLine();
-		cMakeListsEditor.AppendLine("qt5_wrap_ui(UI_HEADERS ${UI_FILES})");
-		cMakeListsEditor.AppendLine("qt5_add_resources(UI_RESOURCES resources.qrc)");
-		cMakeListsEditor.blankLine();
-		cMakeListsEditor.SetVariable("SOURCE_FILES", "${SRC_FILES}");
-
-		cMakeListsEditor.AppendLine("if(APPLE)");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_INFO_STRING \"${PROJECT_NAME} ${PROJECT_VERSION}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_BUNDLE_VERSION \"${PROJECT_NAME} ${PROJECT_VERSION}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_LONG_VERSION_STRING \"${PROJECT_NAME} ${PROJECT_VERSION}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_SHORT_VERSION_STRING \"${PROJECT_VERSION}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_COPYRIGHT \"${PROJECT_COPYRIGHT_YEAR} ${PROJECT_VENDOR}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_ICON_FILE \"launcher.icns\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_GUI_IDENTIFIER \"${PROJECT_DOMAIN_SECOND}.${PROJECT_DOMAIN_FIRST}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_BUNDLE_NAME \"${PROJECT_NAME}\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_RESOURCES \"${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources\")");
-		cMakeListsEditor.AppendLine("\tset(MACOSX_BUNDLE_ICON \"../resources/${MACOSX_BUNDLE_ICON_FILE}\")");
-
-		cMakeListsEditor.AppendLine("\tadd_custom_target( OSX_BUNDLE");
-		cMakeListsEditor.AppendLine("\t\tCOMMAND ${CMAKE_COMMAND} -E make_directory ${MACOSX_BUNDLE_RESOURCES}");
-		cMakeListsEditor.AppendLine("\t\tCOMMAND ${CMAKE_COMMAND} -E copy_if_different ${MACOSX_BUNDLE_ICON} ${MACOSX_BUNDLE_RESOURCES}");
-		cMakeListsEditor.AppendLine("\t\t#COMMAND ${CMAKE_COMMAND} -E copy *.qm ${MACOSX_BUNDLE_RESOURCES}");
-		cMakeListsEditor.AppendLine("\t\t)");
-		cMakeListsEditor.AppendLine("\tadd_executable( " + projectName + " MACOSX_BUNDLE ${SOURCE_FILES} ${UI_HEADERS} ${UI_RESOURCES})");
-		cMakeListsEditor.AppendLine("\tadd_dependencies( " + projectName + " OSX_BUNDLE )");
-		cMakeListsEditor.AppendLine("\tset_source_files_properties( ${ProjectName_RESOURCES} ${ProjectName_TRANSLATIONS} PROPERTIES MACOSX_PACKAGE_LOCATION Resources )");
-		cMakeListsEditor.AppendLine("else()");
-		cMakeListsEditor.AppendLine("\tadd_executable( " + projectName + " WIN32 ${SOURCE_FILES} ${UI_HEADERS} ${UI_RESOURCES})");
-		cMakeListsEditor.AppendLine("endif()");
-		cMakeListsEditor.blankLine();
-
-		cMakeListsEditor.blankLine();
-		cMakeListsEditor.AppendLine("target_link_libraries(" + projectName + " ${QT_LIBRARIES})");
-		cMakeListsEditor.AppendLine("qt5_use_modules(" + projectName + " Core Widgets Gui)");
 
 		//CMakeWorkspace.forceReloadOnOpening(cMakeListsVirtualFile);
 		//VfsUtil.findFileByIoFile(projectRoot, true);
@@ -200,10 +117,6 @@ public class NewQtProjectWizart extends CMakeProjectWizard {
 		if (mainFile == null) {
 			return;
 		}
-		final VirtualFile resourceFile = projectRoot.findChild("resources.qrc");
-		if (resourceFile == null) {
-			return;
-		}
 
 		Project project = ProjectManagerImpl.getInstanceEx().newProject(projectName, projectAdapterPath, true,false);
 		ProjectManagerEx.getInstanceEx().openProject(project);
@@ -220,71 +133,15 @@ public class NewQtProjectWizart extends CMakeProjectWizard {
 //		}
 
 		CMakeProjectOpenProcessor.OpenProjectSpec projectSpec = CMakeProjectOpenProcessor.getHelper().getAndClearFileToOpenData(project);
-//
+
 		deleteBuildOutputDir(projectSpec);
 		(new OpenFileDescriptor(project, cMakeLists)).navigate(false);
 		(new OpenFileDescriptor(project, mainFile)).navigate(true);
-		(new OpenFileDescriptor(project, resourceFile)).navigate(true);
 	}
 
 	private void deleteBuildOutputDir(CMakeProjectOpenProcessor.OpenProjectSpec projectSpec) {
 		if (projectSpec != null && projectSpec.generationDir != null) {
 			FileUtil.delete(projectSpec.generationDir);
 		}
-	}
-
-
-
-
-
-
-	public static final String defMainFile =
-					"#include <QtCore>\n" +
-					"#include <QtWidgets>\n" +
-					"\n" +
-					"int main(int argc, char **argv) {\n" +
-						"\tQApplication application(argc, argv);\n" +
-						"\tapplication.setApplicationName(\"%s\");\n" +
-						"\tapplication.setOrganizationDomain(\"%s\");\n" +
-						"\tapplication.setOrganizationName(\"%s\");\n" +
-						"\n" +
-						"\treturn application.exec();\n" +
-					"}";
-	public static File CreateMainFile(File projectRoot, NewQtProjectStep adapter) throws IOException {
-		// Create main
-		File file = new File(projectRoot, "main.cpp");
-		if (!file.exists() && !file.createNewFile()) {
-			throw new IOException("Cannot create file " + file);
-		}
-		String orgName = adapter.GetOrganizationName();
-		String orgDomain = adapter.GetOrganizationDomain();
-		if(orgDomain.isEmpty()) {
-			orgDomain = orgName.toLowerCase() + ".ws";
-		}
-		FileUtil.writeToFile(file, String.format(defMainFile, adapter.GetName(), orgDomain, orgName));
-		return file;
-	}
-
-
-
-	public static final String defResourceFile = "<RCC version=\"1.0\">\n" +
-												 "<qresource>\n" +
-												 "</qresource>\n" +
-												 "</RCC>";
-	public static File CreateResourceFile(File projectRoot, NewQtProjectStep adapter) throws IOException {
-		File file = new File(projectRoot, "resources.qrc");
-		if (!file.exists() && !file.createNewFile()) {
-			throw new IOException("Cannot create file " + file);
-		}
-		FileUtil.writeToFile(file, defResourceFile);
-		return file;
-	}
-
-	public static File CreateMakeFile(File projectRoot) throws IOException {
-		File file = new File(projectRoot, "CMakeLists.txt");
-		if (!file.exists() && !file.createNewFile()) {
-			throw new IOException("Cannot create file " + file);
-		}
-		return file;
 	}
 }

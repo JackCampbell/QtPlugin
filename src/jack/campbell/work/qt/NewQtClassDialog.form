@@ -18,6 +18,8 @@
     <rowspec value="center:max(d;4px):noGrow"/>
     <rowspec value="top:3dlu:noGrow"/>
     <rowspec value="center:max(d;4px):noGrow"/>
+    <rowspec value="top:3dlu:noGrow"/>
+    <rowspec value="center:max(d;4px):noGrow"/>
     <colspec value="fill:d:noGrow"/>
     <colspec value="left:4dlu:noGrow"/>
     <colspec value="fill:d:grow"/>
@@ -60,6 +62,7 @@
           <forms/>
         </constraints>
         <properties>
+          <editable value="true"/>
           <model>
             <item value="QObject"/>
             <item value="QWidget"/>
@@ -168,6 +171,16 @@
           <forms defaultalign-horz="false"/>
         </constraints>
         <properties/>
+      </component>
+      <component id="bfb8a" class="javax.swing.JCheckBox" binding="appendFromPrecompiledFileCheckBox" default-binding="true">
+        <constraints>
+          <grid row="18" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <enabled value="false"/>
+          <text value="Append from precompiled file"/>
+        </properties>
       </component>
     </children>
   </grid>
