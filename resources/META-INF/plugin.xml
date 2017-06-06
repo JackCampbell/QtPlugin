@@ -26,6 +26,7 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <!--<toolWindow id="Qt Resource View" anchor="right" factoryClass="jack.campbell.work.qt.QtResourceView"/>-->
+    <!--<applicationService serviceImplementation="jack.campbell.work.qt.QtPreference" serviceInterface="jack.campbell.work.qt.QtPreference"/>-->
   </extensions>
 
   <application-components>

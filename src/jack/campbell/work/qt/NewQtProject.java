@@ -20,11 +20,11 @@ public class NewQtProject extends AnAction {
 		if (NewWelcomeScreen.isNewWelcomeScreen(event)) {
 			event.getPresentation().setIcon(AllIcons.Welcome.CreateNewProject);
 		}
-
 	}
 
 	@Override
 	public void actionPerformed(AnActionEvent e) {
-		(new NewQtProjectWizart()).runWizard();
+		NewQtProjectWizard wizard = new NewQtProjectWizard();
+		wizard.runWizard();
 	}
 }

@@ -33,7 +33,7 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 	private JTextField fldSourceFile;
 	private JTextField fldHeaderFile;
 	private JTextField fldDesignFile;
-	private JCheckBox appendFromPrecompiledFileCheckBox;
+	private JCheckBox rejectSlotCheckBox;
 
 	private Project project;
 	private VirtualFile directoryVirtualFile;
@@ -43,12 +43,6 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		fldTitle.getDocument().addDocumentListener(this);
 		fldBaseClass.addItemListener(this);
 		btnDesign.addItemListener(this);
-		if(directoryVirtualFile.findChild("precompiled.h") != null) {
-			appendFromPrecompiledFileCheckBox.setSelected(true);
-		} else {
-			appendFromPrecompiledFileCheckBox.setSelected(false);
-		}
-
 		this.directoryVirtualFile = directoryVirtualFile;
 		this.project = project;
 		init();
@@ -161,13 +155,7 @@ public class NewQtClassDialog extends DialogWrapper implements DocumentListener,
 		String className = fldClassName.getText();
 		String headerFile = fldHeaderFile.getText();
 		String content = "// Generator id: " + title + "\n";
-		if(!appendFromPrecompiledFileCheckBox.isSelected()) {
-			content += "#include <QtCore>\n";
-			content += "#include <QtWidgets>\n";
-			content += "#include <QtCore>\n";
-		} else {
-			content += "#include \"precompiled.h\"\n";
-		}
+		content += "#include \"precompiled.h\"\n";
 		content += "#pragma once\n";
 		content += "\n";
 		if(btnDesign.isSelected()) {

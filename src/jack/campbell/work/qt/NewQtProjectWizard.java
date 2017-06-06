@@ -25,10 +25,10 @@ import java.util.Optional;
  * Created by jack on 4/19/17.
  */
 
-public class NewQtProjectWizart extends CMakeProjectWizard {
+public class NewQtProjectWizard extends CMakeProjectWizard {
 	private NewQtProjectStep adapter;
-	public NewQtProjectWizart() {
-		super("New QT Project", "NewQtProjectWizart");
+	public NewQtProjectWizard() {
+		super("New QT Project", "NewQtProjectWizard");
 
 		String lastDir = Optional.ofNullable(RecentProjectsManager.getInstance().getLastProjectCreationLocation()).orElse("");
 		adapter = new NewQtProjectStep("", new File(lastDir).getPath());
@@ -82,17 +82,16 @@ public class NewQtProjectWizart extends CMakeProjectWizard {
 
 	public static String CreateProject(String projectRootPath, NewQtProjectStep adapter) throws IOException {
 		String projectName = FileUtil.sanitizeFileName(adapter.GetName());
-
-		// check CMakeList
 		File projectRoot = new File(projectRootPath);
-		File mainFile = adapter.CreateMainFile(projectRoot);
-		File resource = adapter.CreateResource(projectRoot);
 
-		File makeFile = adapter.CreateMakeFile(projectRoot);
+		adapter.CreateResourceFile(projectRoot);
+		adapter.CreatePrecompiled(projectRoot);
+		adapter.CreateMainFile(projectRoot);
+		adapter.CreateToolchain(projectRoot);
+		adapter.CreateMakeFile(projectRoot);
+		adapter.Apply();
 
 		//VirtualFile cMakeListsVirtualFile = VfsUtil.findFileByIoFile(cMakeLists, true);
-
-
 		//CMakeWorkspace.forceReloadOnOpening(cMakeListsVirtualFile);
 		//VfsUtil.findFileByIoFile(projectRoot, true);
 		return projectName;
